@@ -118,3 +118,13 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
+
+# homebridge dev stuff
+accessories/
+persist/
+*~
+backups/
+.uix-dashboard.json
+.uix-secrets
+auth.json
+config.json

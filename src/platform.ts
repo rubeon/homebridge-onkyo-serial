@@ -1,19 +1,28 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { ExamplePlatformAccessory } from './platformAccessory';
+import { OnkyoSerialPlatformAccessory } from './platformAccessory';
+
+var SerialPort = require ('serialport');
 
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
-export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
+ 
+var inputs = {
+   
+}
+ 
+export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+  private baudRate = 9600;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
+  public connections = {};
 
   constructor(
     public readonly log: Logger,
@@ -39,7 +48,7 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
    */
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
-
+    
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
   }
@@ -64,53 +73,61 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
         exampleDisplayName: 'Kitchen',
       },
     ];
+    
+    const serialDevices = [
+      { 
+        path: "/dev/ttyS0",
+        displayName: "Onkyo AVR"
+      }
+    ]
+    /* 
+       I'd like to be able to use this, but it's a Promise and I 
+       don't now how that works...
+    */
+    // const serialDevices = SerialPort.list();
+    // this.log.debug(serialDevices);
+    
+    for (const device of serialDevices) {
+      // generate a UUID for this connection
+      const uuid = this.api.hap.uuid.generate(device.path);
+      this.log.debug("Using uuid %s", uuid);
+      this.connections[device.path] = SerialPort(device.path, {
+                                           baudRate: this.baudRate,
+                                           dataBits: 8,
+                                           stopBits: 1,
+                                           parity: "none",
+                                           lock: true,
+                                           autoOpen: true
+                                           });
 
-    // loop over the discovered devices and register each one if it has not already been registered
-    for (const device of exampleDevices) {
-
-      // generate a unique id for the accessory this should be generated from
-      // something globally unique, but constant, for example, the device serial
-      // number or MAC address
-      const uuid = this.api.hap.uuid.generate(device.exampleUniqueId);
-
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-
+      // check if this is an existing accessory
+      const existingAccessory = this.accessories.find(accessory => accessory.UUID == uuid);
       if (existingAccessory) {
-        // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        // existingAccessory.context.device = device;
-        // this.api.updatePlatformAccessories([existingAccessory]);
-
+        this.log.info("Restoring existing accessory from cache:", existingAccessory.displayName);
+        
         // create the accessory handler for the restored accessory
-        // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, existingAccessory);
-
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+        new OnkyoSerialPlatformAccessory(this, existingAccessory);
+        
+        
       } else {
-        // the accessory does not yet exist, so we need to create it
-        this.log.info('Adding new accessory:', device.exampleDisplayName);
-
-        // create a new accessory
-        const accessory = new this.api.platformAccessory(device.exampleDisplayName, uuid);
-
-        // store a copy of the device object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
+        // new accessory
+        this.log.info("Adding new accessory", device.displayName);
+        const accessory = new this.api.platformAccessory(device.displayName, 
+                                                         uuid, 
+                                                         this.api.hap.Categories.AUDIO_RECEIVER);
+        
+        // store a copy o the object in the accessory.context
+        // the context property can be used to store any data 
+        // about the accessory you may need
         accessory.context.device = device;
 
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, accessory);
-
-        // link the accessory to your platform
+        new OnkyoSerialPlatformAccessory(this, accessory);
+        
+        // link the accessory to the platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
+    
+
     }
   }
 }

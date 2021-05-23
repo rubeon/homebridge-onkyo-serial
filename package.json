@@ -1,16 +1,16 @@
 {
   "private": true,
-  "displayName": "Plugin Name",
-  "name": "homebridge-plugin-name",
-  "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "displayName": "Onkyo Serial",
+  "name": "homebridge-plugin-onkyo-serial",
+  "version": "0.0.2",
+  "description": "Homebridge platform for Onkyo receivers via an RS232 interface",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "git://github.com/rubeon/homebridge-onkyo-serial.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/rubeon/homebridge-onkyo-serial/issues"
   },
   "engines": {
     "node": ">=10.17.0",
@@ -24,9 +24,14 @@
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "onkyo",
+    "serial"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "homebridge-tplink-smarthome": "^6.4.0",
+    "serialport": "^8.0.8"
+  },
   "devDependencies": {
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
