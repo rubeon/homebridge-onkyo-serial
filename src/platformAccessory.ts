@@ -2,7 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { OnkyoSerialHomebridgePlatform } from './platform';
 
-const Delimiter = require('@serialport/parser-delimiter')
+import Delimiter = require('@serialport/parser-delimiter')
 
 
 /**
@@ -222,7 +222,7 @@ export class OnkyoSerialPlatformAccessory {
     this.platform.log.debug("Processing PWR response")
     // sometimes this returns something besides 00 or 01 (N/A for example)
     if (response == "01") { this.states.powerOn=true };
-    if (response == "00") { this.states.powerOn=false};
+    if (response == "00") { this.states.powerOn=false}
     this.platform.log.debug("powerOn set to ", this.states.powerOn);
     
   }

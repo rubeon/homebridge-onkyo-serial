@@ -3,18 +3,14 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { OnkyoSerialPlatformAccessory } from './platformAccessory';
 
-var SerialPort = require ('serialport');
+import SerialPort = require ('serialport');
 
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
- 
-var inputs = {
-   
-}
- 
+
 export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
@@ -48,7 +44,6 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
    */
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
-    
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
   }
@@ -63,71 +58,55 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
     // or a user-defined array in the platform config.
-    const exampleDevices = [
+    const serialDevices = [
       {
-        exampleUniqueId: 'ABCD',
-        exampleDisplayName: 'Bedroom',
-      },
-      {
-        exampleUniqueId: 'EFGH',
-        exampleDisplayName: 'Kitchen',
+        path: '/dev/ttyS0',
+        displayName: 'Onkyo AVR',
       },
     ];
-    
-    const serialDevices = [
-      { 
-        path: "/dev/ttyS0",
-        displayName: "Onkyo AVR"
-      }
-    ]
-    /* 
-       I'd like to be able to use this, but it's a Promise and I 
+    /*
+       I'd like to be able to use this, but it's a Promise and I
        don't now how that works...
     */
     // const serialDevices = SerialPort.list();
     // this.log.debug(serialDevices);
-    
+
     for (const device of serialDevices) {
       // generate a UUID for this connection
       const uuid = this.api.hap.uuid.generate(device.path);
-      this.log.debug("Using uuid %s", uuid);
+      this.log.debug('Using uuid %s', uuid);
       this.connections[device.path] = SerialPort(device.path, {
-                                           baudRate: this.baudRate,
-                                           dataBits: 8,
-                                           stopBits: 1,
-                                           parity: "none",
-                                           lock: true,
-                                           autoOpen: true
-                                           });
+        baudRate: this.baudRate,
+        dataBits: 8,
+        stopBits: 1,
+        parity: 'none',
+        lock: true,
+        autoOpen: true,
+      });
 
       // check if this is an existing accessory
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID == uuid);
+      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
       if (existingAccessory) {
-        this.log.info("Restoring existing accessory from cache:", existingAccessory.displayName);
-        
+        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+
         // create the accessory handler for the restored accessory
         new OnkyoSerialPlatformAccessory(this, existingAccessory);
-        
-        
       } else {
         // new accessory
-        this.log.info("Adding new accessory", device.displayName);
-        const accessory = new this.api.platformAccessory(device.displayName, 
-                                                         uuid, 
-                                                         this.api.hap.Categories.AUDIO_RECEIVER);
-        
+        this.log.info('Adding new accessory', device.displayName);
+        const accessory = new this.api.platformAccessory(device.displayName,
+          uuid,
+          this.api.hap.Categories.AUDIO_RECEIVER);
         // store a copy o the object in the accessory.context
-        // the context property can be used to store any data 
+        // the context property can be used to store any data
         // about the accessory you may need
         accessory.context.device = device;
 
         new OnkyoSerialPlatformAccessory(this, accessory);
-        
+
         // link the accessory to the platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
-    
-
     }
   }
 }
