@@ -2,7 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { OnkyoSerialHomebridgePlatform } from './platform';
 
-import Delimiter = require('@serialport/parser-delimiter')
+import Delimiter = require('@serialport/parser-delimiter');
 
 
 /**
@@ -24,15 +24,15 @@ export class OnkyoSerialPlatformAccessory {
    * These are just used to create a working example
    * You should implement your own code to track the state of your accessory
    */
-  
+
   private states = {
     powerOn: false,
     volume: 0,
     isMuted:false,
     brightness: 0,
-    input: 0
-  }
-   
+    input: 0,
+  };
+
   private exampleStates = {
     On: false,
     Brightness: 100,
@@ -52,10 +52,10 @@ export class OnkyoSerialPlatformAccessory {
     // get my port
     this.platform.log.debug(JSON.stringify(this.platform.connections));
     this.port = this.platform.connections[accessory.context.device.path];
-    
+
     // create a delimiter parser of 1a
     this.parser = this.port.pipe(new Delimiter({delimiter: [0x1a]}));
-    this.parser.on("data", this.handleAnswer.bind(this));
+    this.parser.on('data', this.handleAnswer.bind(this));
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -77,8 +77,9 @@ export class OnkyoSerialPlatformAccessory {
       .onSet(this.setVolume.bind(this));       // SET - bind to the 'setBrightness` method below
     // try to create a volume knob
     /*
-    this.muter = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device.displayName + " Mute", 'muter');
-    this.muter 
+    this.muter = this.accessory.getService(this.platform.Service.
+    Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device.displayName + " Mute", 'muter');
+    this.muter
         .getCharacteristic(this.platform.Characteristic.On)
         .onSet(this.setMuted.bind(this))
         .onGet(this.getMuted.bind(this));
@@ -100,34 +101,36 @@ export class OnkyoSerialPlatformAccessory {
          .on('get', this.getVolumeState.bind(this))
          .on('set', this.setVolumeState.bind(this));
     */
-    
+
     // this.service.addLinkedService(this.muter);
-    
+
     // try to add the spekaer service?
-    
+
     this.televisionService = new this.platform.Service.Television(this.accessory.context.device.displayName, 'televisionService');
-    this.televisionService.setCharacteristic(this.platform.Characteristic.ConfiguredName, "TV LOL");
-    
+    this.televisionService.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'TV LOL');
+
     /*
-    this.televisionService = this.accessory.getService(this.platform.Service.Television) || 
+    this.televisionService = this.accessory.getService(this.platform.Service.Television) ||
       this.accessory.addService(this.platform.Service.Television,  accessory.context.device.displayName + 'televisionService');
     this.televisionService.setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.displayName + " TV");
-    
-    // this.televisionService.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode, this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
-    */    
+
+    // this.televisionService.setCharacteristic(this.platform.Characteristic.SleepDiscoveryMode,
+    this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
+    */
     this.televisionService.getCharacteristic(this.platform.Characteristic.Active)
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
-    this.platform.log.debug("Adding speaker service");
+    this.platform.log.debug('Adding speaker service');
 
-    this.speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) || this.accessory.addService(this.platform.Service.TelevisionSpeaker, accessory.context.device.displayName + " Speaker")
+    this.speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) ||
+      this.accessory.addService(this.platform.Service.TelevisionSpeaker, accessory.context.device.displayName + ' Speaker');
     this.speakerService
       .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
       .setCharacteristic(this.platform.Characteristic.VolumeControlType, this.platform.Characteristic.VolumeControlType.ABSOLUTE);
     this.speakerService.getCharacteristic(this.platform.Characteristic.Volume)
       .onSet(this.setVolume.bind(this))
-      .onGet(this.getVolume.bind(this))
+      .onGet(this.getVolume.bind(this));
     this.speakerService
       .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
       .setCharacteristic(this.platform.Characteristic.VolumeControlType, this.platform.Characteristic.VolumeControlType.ABSOLUTE);
@@ -135,9 +138,9 @@ export class OnkyoSerialPlatformAccessory {
       .onSet(this.setMuted.bind(this))
       .onGet(this.getMuted.bind(this));
 
-    this.speakerService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName + " Speaker");
-  
-    this.televisionService.addLinkedService(this.speakerService);          
+    this.speakerService.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName + ' Speaker');
+
+    this.televisionService.addLinkedService(this.speakerService);
 
     /**
      * Creating multiple services of the same type.
@@ -168,7 +171,7 @@ export class OnkyoSerialPlatformAccessory {
      * the `updateCharacteristic` method.
      *
      */
-     
+
     /*
     let motionDetected = false;
     setInterval(() => {
@@ -192,20 +195,20 @@ export class OnkyoSerialPlatformAccessory {
   async setOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
     this.states.powerOn = value as boolean;
-    
+
     if (this.states.powerOn) {
-      this.platform.log.debug("Turning on...");
-      this.sendCmd("PWR01");
+      this.platform.log.debug('Turning on...');
+      this.sendCmd('PWR01');
     } else {
-      this.platform.log.debug("Turning off...");
-      this.sendCmd("PWR00");
+      this.platform.log.debug('Turning off...');
+      this.sendCmd('PWR00');
     }
-    
+
     this.platform.log.debug('Set Characteristic On ->', value);
   }
 
   /**
-   * Handle the "GET" requests from HomeKit
+   * Handle the 'GET' requests from HomeKit
    * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
    *
    * GET requests should return as fast as possbile. A long delay here will result in
@@ -219,128 +222,132 @@ export class OnkyoSerialPlatformAccessory {
    */
   isOnOff(response) {
     // parses the reponse and says whether it's on or off
-    this.platform.log.debug("Processing PWR response")
+    this.platform.log.debug('Processing PWR response');
     // sometimes this returns something besides 00 or 01 (N/A for example)
-    if (response == "01") { this.states.powerOn=true };
-    if (response == "00") { this.states.powerOn=false}
-    this.platform.log.debug("powerOn set to ", this.states.powerOn);
-    
+    if (response === '01') {
+      this.states.powerOn=true;
+    }
+    if (response === '00') {
+      this.states.powerOn=false;
+    }
+    this.platform.log.debug('powerOn set to ', this.states.powerOn);
+
   }
-  
+
   async getOn(): Promise<CharacteristicValue> {
     // implement your own code to check if the device is on
     const isOn = this.states.powerOn;
 
-    this.sendCmd("PWRQSTN");
-    
+    this.sendCmd('PWRQSTN');
+
     this.platform.log.debug('Get Characteristic On ->', isOn);
 
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
+    // if you need to return an error to show the device as 'Not Responding' in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
     return isOn;
   }
-  
+
   isMuted(response) {
-    this.platform.log.debug("Processing MUT response");
-    if (response == "01") { this.states.isMuted=true};
-    if (response == "00") { this.states.isMuted=false};
+    this.platform.log.debug('Processing MUT response');
+    if (response === '01') {
+      this.states.isMuted=true;
+    }
+    if (response === '00') {
+      this.states.isMuted=false;
+    }
   }
-  
+
   async getMuted(): Promise<CharacteristicValue> {
     // check if the device is muted
     const isMuted = this.states.isMuted;
-    this.sendCmd("AMTQSTN");
-    this.platform.log.debug("Get Characteristic On ->", isMuted);
+    this.sendCmd('AMTQSTN');
+    this.platform.log.debug('Get Characteristic On ->', isMuted);
     return isMuted;
   }
 
   async setMuted(value: CharacteristicValue) {
-    this.states.isMuted = value as boolean
+    this.states.isMuted = value as boolean;
     if (this.states.isMuted) {
-      this.platform.log.debug("Muting...");
-      this.sendCmd("AMT01");
+      this.platform.log.debug('Muting...');
+      this.sendCmd('AMT01');
     } else {
-      this.platform.log.debug("Unmuting...");
-      this.sendCmd("AMT00");
+      this.platform.log.debug('Unmuting...');
+      this.sendCmd('AMT00');
     }
-    
+
   }
 
   async getVolume(): Promise<CharacteristicValue> {
-    this.platform.log.debug("getVolume entered");
-    this.sendCmd("MVLQSTN");
+    this.platform.log.debug('getVolume entered');
+    this.sendCmd('MVLQSTN');
     const volume = this.states.volume;
-    this.platform.log.debug("Get Characteristic Volume ->", volume);
-    return volume
+    this.platform.log.debug('Get Characteristic Volume ->', volume);
+    return volume;
   }
 
   updateVolume(response) {
     // handles packets returned from the volume master volume command
-    this.platform.log.debug("handleVolume entered");
-    var newVolume = parseInt(response, 16);    
-    this.platform.log.debug("response: ", newVolume);
+    this.platform.log.debug('handleVolume entered');
+    const newVolume = parseInt(response, 16);
+    this.platform.log.debug('response: ', newVolume);
     // this should create a percentage between min range / max range
     // e.g. if min is 20 and max is 70, then:
     // 20 + (50 * response / 100)
     // this is the actual volume on the amp
-    var pct = (newVolume - this.minVolume) / (this.maxVolume - this.minVolume) * 100;
+    const pct = (newVolume - this.minVolume) / (this.maxVolume - this.minVolume) * 100;
     // change this to a percent of 20..70
-    this.platform.log.debug("pct: ", pct);
+    this.platform.log.debug('pct: ', pct);
     this.states.volume = pct;
-    this.platform.log.debug("new volume:", this.states.volume);    
+    this.platform.log.debug('new volume:', this.states.volume);
   }
-  
+
   async setVolume(value: CharacteristicValue) {
     // applies the configured volume
-    var newVolume = value as number;
-    this.platform.log.debug("Setting volume to", newVolume, "%");
+    const newVolume = value as number;
+    this.platform.log.debug('Setting volume to', newVolume, '%');
     this.states.volume = newVolume;
     // calculate percent range
-    var realVolume = Math.floor(this.minVolume + ((this.maxVolume - this.minVolume) * newVolume / 100));
-    this.platform.log.debug("Setting real volume to", realVolume);
+    const realVolume = Math.floor(this.minVolume + ((this.maxVolume - this.minVolume) * newVolume / 100));
+    this.platform.log.debug('Setting real volume to', realVolume);
     // convert to hex
-    var hexVolume = realVolume.toString(16).toUpperCase();
-    this.sendCmd("MVL" + hexVolume);
-    
+    const hexVolume = realVolume.toString(16).toUpperCase();
+    this.sendCmd('MVL' + hexVolume);
+
   }
 
   sendCmd(cmd) {
     // sends a command to the receiver
-    var rawCmd = "!1" + cmd + "\r";
-    this.platform.log.debug("sendCmd", rawCmd);
+    const rawCmd = '!1' + cmd + '\r';
+    this.platform.log.debug('sendCmd', rawCmd);
     this.port.write(rawCmd);
   }
 
   handleAnswer(data) {
-    this.platform.log.debug('handleAnswer entered')
-    this.platform.log.debug(data.toString("utf8"));;
-    var responseCommand = data.slice(2,5).toString("utf8");
-    var responseArgs = data.slice(5,7).toString("utf8");
-    this.platform.log.debug("Response command: %s", responseCommand);
-    this.platform.log.debug("Response args: %s", responseArgs);
-    
+    this.platform.log.debug('handleAnswer entered');
+    this.platform.log.debug(data.toString('utf8'));
+    const responseCommand = data.slice(2, 5).toString('utf8');
+    const responseArgs = data.slice(5, 7).toString('utf8');
+    this.platform.log.debug('Response command: %s', responseCommand);
+    this.platform.log.debug('Response args: %s', responseArgs);
 
-    
     switch (responseCommand) {
-      case "PWR":
-        this.platform.log.debug("power response");
+      case 'PWR':
+        this.platform.log.debug('power response');
         this.isOnOff(responseArgs);
         break;
-      case "AMT":
-        this.platform.log.debug("muting response");
+      case 'AMT':
+        this.platform.log.debug('muting response');
         this.isMuted(responseArgs);
         break;
-      case "MVL":
+      case 'MVL':
         this.updateVolume(responseArgs);
         break;
     }
-    
-    
   }
 
   /**
-   * Handle "SET" requests from HomeKit
+   * Handle 'SET' requests from HomeKit
    * These are sent when the user changes the state of an accessory, for example, changing the Brightness
    */
   async setBrightness(value: CharacteristicValue) {
