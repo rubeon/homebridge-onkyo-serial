@@ -133,3 +133,12 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .pnp.*
+*~
+auth.json
+config.json
+.uix-secrets
+.uix-dashboard.json
+persist/
+accessories/
+backups/
+npm-packlist
