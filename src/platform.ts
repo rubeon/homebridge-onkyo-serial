@@ -11,7 +11,7 @@ interface SerialDevice {
 }
 
 /**
- * HomebridgePlatform
+ * OnkyoSerialHomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
