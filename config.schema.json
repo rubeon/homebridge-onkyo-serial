@@ -9,7 +9,10 @@
         "title": "Serial Port Device(s)",
         "type": "array",
         "required": true,
-        "default": "/dev/ttyS0"
+        "items": {
+          "type": "string",
+          "default": "/dev/ttyS0"
+        } 
       }
     }
   }

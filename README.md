@@ -42,3 +42,15 @@ Enable the plugin by adding the following to your homebridge's config.json:
     ]
 ```
 
+## Troubleshooting
+
+* Make sure that the user id running `homebridge` has access to the serial
+  port being used.
+
+Under ubuntu, homebridge is running under the `homebridge` user, and can be
+given access with the following command:
+
+```
+sudo gpasswd -a homebridge dialout
+```
+
