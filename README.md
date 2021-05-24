@@ -5,6 +5,10 @@
 
 </p>
 
+[![Node.js Package](https://github.com/rubeon/homebridge-onkyo-serial/actions/workflows/release.yml/badge.svg)](https://github.com/rubeon/homebridge-onkyo-serial/actions/workflows/release.yml)
+[![Build and Lint](https://github.com/rubeon/homebridge-onkyo-serial/actions/workflows/build.yml/badge.svg)](https://github.com/rubeon/homebridge-onkyo-serial/actions/workflows/build.yml)
+
+
 
 # Onkyo AVR Serial Homebridge Platform Plugin
 
