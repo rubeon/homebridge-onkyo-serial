@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Onkyo Serial",
   "name": "homebridge-plugin-onkyo-serial",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Homebridge platform for Onkyo receivers via an RS232 interface",
   "license": "Apache-2.0",
   "repository": {
