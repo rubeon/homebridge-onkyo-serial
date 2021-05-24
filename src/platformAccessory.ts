@@ -66,7 +66,7 @@ export class OnkyoSerialPlatformAccessory {
       .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
 
     // get my port
-    this.platform.log.debug(JSON.stringify(this.platform.connections));
+    // this.platform.log.debug(JSON.stringify(this.platform.connections));
     this.port = this.platform.connections[accessory.context.device.path];
 
     // create a delimiter parser of 1a
@@ -177,6 +177,8 @@ export class OnkyoSerialPlatformAccessory {
   }
 
   async syncState() {
+    // send id packet
+    this.sendCmd('AMX');
     this.sendCmd('PWRQSTN');
     this.sendCmd('AMTQSTN');
     this.sendCmd('MVLQSTN');
@@ -418,6 +420,11 @@ export class OnkyoSerialPlatformAccessory {
       case 'SLI':
         this.platform.log.debug('input selector response');
         this.updateInputs(responseArgs);
+        break;
+      case 'AMX':
+        this.platform.log.debug('identify packet response');
+        this.platform.log.debug(data);
+        break;
     }
   }
 

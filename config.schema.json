@@ -5,11 +5,11 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
+      "paths": {
+        "title": "Serial Port Device(s)",
+        "type": "array",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "/dev/ttyS0"
       }
     }
   }

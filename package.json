@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "Onkyo Serial",
   "name": "homebridge-plugin-onkyo-serial",
   "version": "0.0.2",

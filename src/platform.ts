@@ -5,6 +5,11 @@ import { OnkyoSerialPlatformAccessory } from './platformAccessory';
 
 import SerialPort = require ('serialport');
 
+interface SerialDevice {
+  path: string;
+  displayName: string;
+}
+
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -15,7 +20,6 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
   private baudRate = 9600;
-
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
   public connections = {};
@@ -26,7 +30,7 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
-
+    this.config = config;
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
@@ -54,16 +58,32 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-
+    this.log.debug('discoverDevices entered...');
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
     // or a user-defined array in the platform config.
-    const serialDevices = [
-      {
-        path: '/dev/ttyS0',
-        displayName: 'Onkyo AVR',
-      },
-    ];
+    let serialDevices = [] as SerialDevice[];
+
+    if ('paths' in this.config) {
+      this.log.info('Using configured paths from config.json');
+      this.log.debug(this.config.paths);
+      for (let i = 0; i < this.config.paths.length; i++) {
+        serialDevices.push({
+          path: this.config.paths[i],
+          displayName: i === 0 ? 'Onkyo AVR' : 'Onkyo AVR ' + i.toString(),
+        });
+      }
+    } else {
+      serialDevices = [
+        {
+          path: '/dev/ttyS0',
+          displayName: 'Onkyo AVR',
+        },
+      ];
+    }
+
+    this.log.debug('serialDevices: ', serialDevices);
+
     /*
        I'd like to be able to use this, but it's a Promise and I
        don't now how that works...
