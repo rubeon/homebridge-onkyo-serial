@@ -5,6 +5,10 @@
   "version": "0.0.3",
   "description": "Homebridge platform for Onkyo receivers via an RS232 interface",
   "license": "Apache-2.0",
+  "author": {
+    "name": "Eric Williams",
+    "email": "eric@subcritical.org"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/rubeon/homebridge-onkyo-serial.git"
