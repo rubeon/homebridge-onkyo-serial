@@ -27,10 +27,6 @@ export class OnkyoSerialPlatformAccessory {
   private maxVolume = 70;
   private minVolume = 0;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
 
   private inputs = {
     '00': 'VCR/DVR',
@@ -81,129 +77,16 @@ export class OnkyoSerialPlatformAccessory {
       this.accessory.addService(this.platform.Service.Television);
 
     this.init();
-
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
-    /*
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
-
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
-
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb
-
-    // register handlers for the On/Off Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
-      .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setVolume.bind(this));       // SET - bind to the 'setBrightness` method below
-    */
-    // try to create a volume knob
-    /*
-    this.muter = this.accessory.getService(this.platform.Service.
-    Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device.displayName + " Mute", 'muter');
-    this.muter
-        .getCharacteristic(this.platform.Characteristic.On)
-        .onSet(this.setMuted.bind(this))
-        .onGet(this.getMuted.bind(this));
-        /*
-        .on('get', callback => {
-                this.getMuted((error, value) {
-                  if (error) {
-                    callback(error);
-                    return;
-                  }
-                  callback(null, !value);
-                });
-         })
-         .on('set', (value, callback) => this.setMuted(!value, callback));
-         */
-    /*
-    this.dimmer
-         .addCharacteristic(Characteristic.Brightness)
-         .on('get', this.getVolumeState.bind(this))
-         .on('set', this.setVolumeState.bind(this));
-    */
-
-    // this.service.addLinkedService(this.muter);
-
-    // try to add the spekaer service?
-    /*
-
-    this.televisionService = new this.platform.Service.Television(this.accessory.context.device.displayName, 'televisionService');
-    this.televisionService.setCharacteristic(this.platform.Characteristic.ConfiguredName, 'TV LOL');
-
-    */
     this.platform.log.debug('XXXXX:  this.accessory.context.device.displayName');
     this.platform.log.debug('XXXXX: ', this.accessory.context.device.displayName);
 
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same sub type id.)
-     */
-
-    // Example: add two "motion sensor" services to the accessory
-    /*
-    const motionSensorOneService = this.accessory.getService('Motion Sensor One Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name') ||
-      this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-      */
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    /*
-    setInterval(() => {
-      this.syncState();
-    }, 10000);
-    */
-
-    /*
-    let motionDetected = false;
-
-    setInterval(() => {
-      // EXAMPLE - inverse the trigger
-      motionDetected = !motionDetected;
-
-      // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
-
-      this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-      this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
-    */
   }
-
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
-   */
 
   async init() {
     await this.createTVService();
     await this.createTVSpeakerService();
     await this.createInputSourceServices();
-    // this.platform.api.publishExternalAccessories(PLUGIN_NAME, [this.accessory]);
-    // get the current power state
+    await this.syncState();
   }
 
   async createTVService() {
@@ -244,13 +127,18 @@ export class OnkyoSerialPlatformAccessory {
       );
 
     // handle volume control
+    /* volume selector seems to be for the remote app?
     speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector)
       .on('set', this.setVolume.bind(this))
       .on('get', this.getVolume.bind(this));
+    */
     speakerService.getCharacteristic(this.platform.Characteristic.Mute)
       .on('set', this.setMuted.bind(this))
       .on('get', this.getMuted.bind(this));
-    return;
+    speakerService.getCharacteristic(this.platform.Characteristic.Volume)
+      .on('get', this.getVolume.bind(this))
+      .on('set', this.setVolume.bind(this));
+    this.service.addLinkedService(speakerService);
   }
 
   async getInputState(callback: CharacteristicGetCallback) {
@@ -332,10 +220,10 @@ export class OnkyoSerialPlatformAccessory {
 
     this.states.inputs.forEach(input => {
       this.platform.log.debug('input: ', input);
-      const inputService = this.accessory.addService(
-        this.platform.Service.InputSource,
-        this.platform.api.hap.uuid.generate(input.code + input.name),
-        input.name);
+      // check if it's been added already, e.g. from cache
+      const uuid = this.platform.api.hap.uuid.generate(input.code + input.name);
+      const inputService = this.accessory.getServiceById(uuid, input.name) ||
+        this.accessory.addService(this.platform.Service.InputSource, uuid, input.name);
 
       inputService
         .setCharacteristic(this.platform.Characteristic.Identifier, input.index)
@@ -430,7 +318,8 @@ export class OnkyoSerialPlatformAccessory {
     callback(null, isMuted);
   }
 
-  async setMuted(value: CharacteristicValue, callback: CharacteristicGetCallback) {
+  async setMuted(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.platform.log.debug('setMuted entered');
     this.states.isMuted = value as boolean;
     if (this.states.isMuted) {
       this.platform.log.debug('Muting...');
@@ -443,10 +332,11 @@ export class OnkyoSerialPlatformAccessory {
 
   }
 
-  async getVolume(): Promise<CharacteristicValue> {
+  async getVolume(callback: CharacteristicGetCallback) {
     this.platform.log.debug('getVolume entered');
     this.sendCmd('MVLQSTN');
     const volume = this.states.volume;
+    callback(null, volume);
     this.platform.log.debug('Get Characteristic Volume ->', volume);
     return volume;
   }
@@ -467,9 +357,26 @@ export class OnkyoSerialPlatformAccessory {
     this.platform.log.debug('new volume:', this.states.volume);
   }
 
-  async setVolume(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+  setVolume(newVolume: CharacteristicValue, callback: CharacteristicSetCallback) {
     // applies the configured volume
-    const newVolume = value as number;
+    // const newVolume = value as number;
+    // can only do louder / softer
+    /*
+    if (direction === 0) {
+      // volume up!
+      newVolume += 5; // up it by 5%
+    } else {
+      newVolume -=5;
+    }
+    */
+    newVolume = newVolume as number;
+    this.platform.log.debug('newVolume: ', newVolume);
+    if (newVolume > 100) {
+      newVolume = 100;
+    }
+    if (newVolume < 0) {
+      newVolume = 0;
+    }
     this.platform.log.debug('Setting volume to', newVolume, '%');
     this.states.volume = newVolume;
     // calculate percent range

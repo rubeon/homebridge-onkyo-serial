@@ -106,7 +106,7 @@ export class OnkyoSerialHomebridgePlatform implements DynamicPlatformPlugin {
 
         // link the accessory to the platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-        this.log.info(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.log.info(PLUGIN_NAME, PLATFORM_NAME);
       }
     }
   }
