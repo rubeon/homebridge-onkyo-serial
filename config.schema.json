@@ -11,7 +11,9 @@
         "required": true,
         "items": {
           "type": "string",
-          "default": "/dev/ttyS0"
+          "default": "/dev/ttyS0",
+          "title": "Path"
+          
         } 
       }
     }

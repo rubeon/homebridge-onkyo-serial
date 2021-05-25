@@ -33,7 +33,6 @@
     "serial"
   ],
   "dependencies": {
-    "homebridge-tplink-smarthome": "^6.4.0",
     "serialport": "^8.0.8"
   },
   "devDependencies": {
